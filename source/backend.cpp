@@ -30,6 +30,7 @@
 #include "datasaver.h"
 #include "behaviortracker.h"
 #include "tracedisplay.h"
+#include "enumerate_devices.h"
 
 #ifdef USE_USB
  #include <libusb.h>
@@ -323,11 +324,17 @@ QStandardItem *backEnd::handleJsonArray(QStandardItem *parent, QJsonArray arry, 
 {
 //    QStringList keys = obj.keys();
 //    type = type.right(6);
-    type = type.right(type.length() - 6);
-    type = type.chopped(1);
+    if(type.length() >= 7){
+        type = type.right(type.length() - 6);
+        type = type.chopped(1);
+    }
     qDebug() << "TYPE" << type;
-    if (type != "String" && type != "Bool" && type != "Integer" && type != "Double" && type != "Number" && type != "Object" && type.left(5) != "Array") {
-        qDebug() << "TYPE" << type;
+    if (type.length() >= 5) {
+        if (type != "String" && type != "Bool" && type != "Integer" && type != "Double" && type != "Number" && type != "Object" && type.left(5) != "Array") {
+            qDebug() << "TYPE" << type;
+            type = "String";
+        }
+    } else {
         type = "String";
     }
 
@@ -911,6 +918,7 @@ bool backEnd::checkForCompression()
     return true;
 }
 
+
 void backEnd::constructUserConfigGUI()
 {
     int idx;
@@ -926,10 +934,31 @@ void backEnd::constructUserConfigGUI()
             traceDisplay = new TraceDisplayBackend(NULL, ucTraceDisplay, m_softwareStartTime);
     }
 
+    int num_to_detect = 0;
+    std::vector<bool> miniscopes_to_detect;
+    std::vector<int> webcams_to_detect;
+    miniscopes_to_detect.resize(ucMiniscopes.size());
+    webcams_to_detect.resize(ucBehaviorCams.size());
+    for (idx = 0; idx < ucMiniscopes.length(); idx++) {
+        QJsonObject q = ucMiniscopes[ucMiniscopes.keys()[idx]].toObject();
+        if (q["deviceID"] == -1) {
+            miniscopes_to_detect[idx] = true;
+            num_to_detect += 1;
+        }
+    }
+
+    if (num_to_detect > 0) {
+        std::vector<std::string> videoDevices = enumerateDevices(CLSID_VideoInputDeviceCategory);
+        for (const std::string& name : videoDevices) {
+            qDebug() << " " << " dev: " << &name;
+        }
+    }
+
     // Make Minsicope displays
     keys = ucMiniscopes.keys();
     for (idx = 0; idx < keys.length(); idx++) {
-        miniscope.append(new Miniscope(this, ucMiniscopes[keys[idx]].toObject(), m_softwareStartTime));
+        QString k = keys[idx];
+        miniscope.append(new Miniscope(this, ucMiniscopes[k].toObject(), m_softwareStartTime));
         QObject::connect(miniscope.last(),
                          SIGNAL (onPropertyChanged(QString, QString, QVariant)),
                          dataSaver,

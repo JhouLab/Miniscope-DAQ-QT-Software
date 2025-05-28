@@ -175,7 +175,7 @@ TreeView {
 //                        else {"#f3f3f3"}
                     }
                 }
-            property var validInt : IntValidator { bottom:0;}
+            property var validInt : IntValidator { bottom:-1;}
             property var validDouble : DoubleValidator { bottom:0;}
             property var validPath : RegExpValidator{regExp: /^[^\\]+$/}
             property var validAll : RegExpValidator{}

@@ -1,6 +1,9 @@
 QT += qml quick widgets
 CONFIG += c++11
 
+CONFIG += console
+
+
 QT += 3dcore
 
 # The following define makes your compiler emit warnings if you use
@@ -25,6 +28,7 @@ SOURCES += \
         behaviortrackerworker.cpp \
         controlpanel.cpp \
         datasaver.cpp \
+        enumerate_devices.cpp \
         main.cpp \
         miniscope.cpp \
         newquickview.cpp \
@@ -36,7 +40,8 @@ SOURCES += \
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH =
+QML_IMPORT_PATH = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\qml
+QML2_IMPORT_PATH = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\qml
 
 # Additional import path used to resolve QML modules just for Qt Quick Designer
 QML_DESIGNER_IMPORT_PATH =
@@ -56,6 +61,7 @@ HEADERS += \
     behaviortrackerworker.h \
     controlpanel.h \
     datasaver.h \
+    enumerate_devices.h \
     miniscope.h \
     newquickview.h \
     tracedisplay.h \
@@ -72,33 +78,18 @@ DISTFILES += \
     ../deviceConfigs/videoDevices.json
 
 win32 {
-    # Path to your openCV .lib file(s)
-    LIBS += -LC:/opencv-4.4.0/build/lib/Release -lopencv_world440
+    LIBS += -lole32
+    LIBS += -lOleAut32
+    LIBS += -lstrmiids
+    LIBS += -LC:\Qt\opencv-4.11.0\build\lib\Debug -lopencv_world4110d
+#    LIBS += -LC:\Qt\opencv-4.11.0\buildMinGW\lib -lopencv_world4110   # opencv_videoio4110 -lopencv_core4110 -lopencv_highgui4110 -lopencv_imgproc4110 -lopencv_imgcodecs4110
 
-#    LIBS += -LC:/opencv-4.4.0/build/lib/Debug -lopencv_world440d
+    INCLUDEPATH += C:/Qt/opencv-4.11.0/build/install/include
 
-    # Path to openCV header files
-    INCLUDEPATH += C:/opencv-4.4.0/build/install/include
+    INCLUDEPATH += C:/ProgramData/miniforge3/envs/acq4/include
+    LIBS += -LC:/ProgramData/miniforge3/envs/acq4/libs -lpython38
 
-    # Do we need DEPENDPATH ????
-#    #DEPENDPATH +=
-
-    # For libusb
-#    LIBS += -LC:/libusb-1.0.24/VS2017/MS64/dll/ -llibusb-1.0
-#    INCLUDEPATH += C:/libusb-1.0.24/include/libusb-1.0
-
-#    LIBS += -LC:/libusb-1.0.23/MS64/dll/ -llibusb-1.0
-#    INCLUDEPATH += C:/libusb-1.0.23/include/libusb-1.0
-
-    # For Python
-#    INCLUDEPATH += C:/Python38/include
-#    LIBS += -LC:/Python38/libs -lpython38
-
-    INCLUDEPATH += C:/Users/dbaha/.conda/envs/basepy37/include
-    LIBS += -LC:/Users/dbaha/.conda/envs/basepy37/libs -lpython37
-
-    # For numpy
-    INCLUDEPATH += C:/Users/dbaha/.conda/envs/basepy37/Lib/site-packages/numpy/core/include
+    INCLUDEPATH += C:/ProgramData/miniforge3/envs/acq4/Lib/site-packages/numpy/core/include
 
 } else {
     CONFIG += link_pkgconfig
