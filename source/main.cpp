@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     QGuiApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
 
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
 
     qRegisterMetaType < QVector<quint8> >("QVector<quint8>");
 
@@ -42,12 +42,12 @@ int main(int argc, char *argv[])
     backEnd backend;
     engine.rootContext()->setContextProperty("backend", &backend);
 
-//    QObject *rootObject = engine.rootObjects().first();
-//    QTreeView *qmlObject = engine.rootObjects().first()->findChild<QTreeView*>("treeView");
-
     engine.load(url);
 
+    QObject *root = qobject_cast<QObject *>(engine.rootObjects().value(0));
+
     backend.setVersionNumber(VERSION_NUMBER);
+    backend.loadDefaultConfig(root);
 //    qDebug() << "TTTEEEE" << engine.rootObjects().first()->findChild<QObject*>("treeView");
 //    QObject::connect(engine.rootObjects().first()->findChild<QObject*>("treeView"), &QTreeView::clicked, &backend, &backEnd::treeViewclicked);
     QObject::connect(&backend, &backEnd::closeAll, &engine, &QQmlApplicationEngine::quit);

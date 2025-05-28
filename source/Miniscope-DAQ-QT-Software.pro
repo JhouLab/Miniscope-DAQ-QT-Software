@@ -78,9 +78,7 @@ DISTFILES += \
     ../deviceConfigs/videoDevices.json
 
 win32 {
-    LIBS += -lole32
-    LIBS += -lOleAut32
-    LIBS += -lstrmiids
+    LIBS += -lole32 -lOleAut32 -lstrmiids
     LIBS += -LC:\Qt\opencv-4.11.0\build\lib\Debug -lopencv_world4110d
 #    LIBS += -LC:\Qt\opencv-4.11.0\buildMinGW\lib -lopencv_world4110   # opencv_videoio4110 -lopencv_core4110 -lopencv_highgui4110 -lopencv_imgproc4110 -lopencv_imgcodecs4110
 

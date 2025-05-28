@@ -17,12 +17,16 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 #include <QModelIndex>
+#include <QMessageBox>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
+
+#include <filesystem>
+#include <fstream>
 
 #include "miniscope.h"
 #include "behaviorcam.h"
@@ -45,14 +49,6 @@ backEnd::backEnd(QObject *parent) :
     behavTracker(nullptr),
     m_jsonTreeModel(new QStandardItemModel())
 {
-#ifdef DEBUG
-//    QString homePath = QDir::homePath();
-    m_userConfigFileName = "./userConfigs/UserConfigExample.json";
-//    loadUserConfigFile();
-    handleUserConfigFileNameChanged();
-
-//    setUserConfigOK(true);
-#endif
     m_softwareStartTime = QDateTime().currentMSecsSinceEpoch();
 
     // User Config default values
@@ -125,6 +121,42 @@ backEnd::backEnd(QObject *parent) :
         // Can't find config props file. Possibly throw an error/warning somewhere???
     }
 
+}
+
+void backEnd::loadDefaultConfig(QObject* root)
+{
+    QString homePath = QDir::homePath();
+
+    QMessageBox msgBox;
+    msgBox.setText("Load default configuration? (./miniscopeConfigs/MiniscopeDefault.json)");
+    msgBox.setWindowTitle("");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+
+    int ret = msgBox.exec();
+
+    if (ret != QMessageBox::Yes)
+        return;
+
+    QString fname = homePath + "/miniscopeConfigs/MiniscopeDefault.json";
+
+    std::ifstream file(fname.toStdString()); //, std::ifstream::in);
+    if (!file.good()) {
+        QMessageBox::warning(NULL, "Warning", "Could not find config file \"" + fname + "\".");
+        return;
+    }
+
+    m_userConfigFileName = fname;
+
+    handleUserConfigFileNameChanged();
+
+    setUserConfigOK(true);
+
+    QObject *treeObj = root->findChild<QObject*>("treeView");  // Search by objectName (NOT id)
+    QObject *viewObj = root->findChild<QObject*>("view");
+
+    treeObj->setProperty("visible", true);
+    viewObj->setProperty("visible", false);
 }
 
 void backEnd::setUserConfigFileName(const QString &input)
@@ -918,7 +950,6 @@ bool backEnd::checkForCompression()
     return true;
 }
 
-
 void backEnd::constructUserConfigGUI()
 {
     int idx;
@@ -935,30 +966,48 @@ void backEnd::constructUserConfigGUI()
     }
 
     int num_to_detect = 0;
-    std::vector<bool> miniscopes_to_detect;
-    std::vector<int> webcams_to_detect;
-    miniscopes_to_detect.resize(ucMiniscopes.size());
-    webcams_to_detect.resize(ucBehaviorCams.size());
     for (idx = 0; idx < ucMiniscopes.length(); idx++) {
         QJsonObject q = ucMiniscopes[ucMiniscopes.keys()[idx]].toObject();
         if (q["deviceID"] == -1) {
-            miniscopes_to_detect[idx] = true;
             num_to_detect += 1;
         }
     }
 
+    std::vector<int> autodetected_miniscope_idx_list;
+    std::vector<std::string> videoDevices;
     if (num_to_detect > 0) {
-        std::vector<std::string> videoDevices = enumerateDevices(CLSID_VideoInputDeviceCategory);
-        for (const std::string& name : videoDevices) {
-            qDebug() << " " << " dev: " << &name;
-        }
+        videoDevices = enumerateDevices(CLSID_VideoInputDeviceCategory);
+        for (idx = 0; idx < videoDevices.size(); idx++)
+            if (videoDevices[idx] == "MINISCOPE")
+                autodetected_miniscope_idx_list.push_back(idx); // Create a list of auto-detected miniscopes
     }
 
     // Make Minsicope displays
+    int autodetected_miniscope_idx = 0;
     keys = ucMiniscopes.keys();
     for (idx = 0; idx < keys.length(); idx++) {
         QString k = keys[idx];
-        miniscope.append(new Miniscope(this, ucMiniscopes[k].toObject(), m_softwareStartTime));
+        QJsonObject m = ucMiniscopes[k].toObject();
+        if (m["deviceID"].toInt() < 0) {
+            // If ID < 0, then use autodetected ID. We should probably write code to make sure we don't reuse the same ID twice.
+            // But for now, this only works if all scopes are autodetected, or all are manually set. Mixing and matching yields unpredictable results.
+            if (autodetected_miniscope_idx < autodetected_miniscope_idx_list.size()) {
+                // Use next autodetected miniscope, in order of detection
+                int id = autodetected_miniscope_idx_list[autodetected_miniscope_idx];
+                QString s = QString::number(id);
+                m["deviceID"] = id;
+                autodetected_miniscope_idx += 1;
+            } else {
+                // Issue warning - could not autodetect miniscope
+                // QMessageBox::warning(NULL, "Warning", "Unable to autodetect Miniscope");
+                QMessageBox msgWarning;
+                msgWarning.setText("Miniscope not detected. Please make sure it is plugged into a USB3 port.");
+                msgWarning.setIcon(QMessageBox::Warning);
+                msgWarning.setWindowTitle("Warning");
+                msgWarning.exec();
+            }
+        }
+        miniscope.append(new Miniscope(this, m, m_softwareStartTime));
         QObject::connect(miniscope.last(),
                          SIGNAL (onPropertyChanged(QString, QString, QVariant)),
                          dataSaver,

@@ -113,7 +113,7 @@ Window {
         id: saveMessageDialog
         property string fName: backend.userConfigFileName
         title: "User Config File Saved"
-        text:  "The user config file has been saved to " + fName.replace(".json", "_new.json")
+        text:  "The user config file has been saved with *_new.json extension to " + fName.replace(".json", "_new.json")
         onAccepted: {
             visible = false
         }
@@ -259,6 +259,7 @@ Window {
 
         ScrollView {
             id: view
+            objectName: "view"
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             Layout.minimumHeight: 80

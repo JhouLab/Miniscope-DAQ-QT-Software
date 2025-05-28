@@ -30,6 +30,8 @@ class backEnd : public QObject
     Q_PROPERTY(QStandardItemModel* jsonTreeModel READ jsonTreeModel WRITE setJsonTreeModel NOTIFY jsonTreeModelChanged)
 
 public:
+    void loadDefaultConfig(QObject *root);
+
     explicit backEnd(QObject *parent = nullptr);
 
     QString userConfigFileName() {return m_userConfigFileName;}
