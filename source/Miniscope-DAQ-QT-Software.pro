@@ -3,6 +3,7 @@ CONFIG += c++11
 
 CONFIG += console
 
+CONFIG += c++17  # Need this for std::filesystem to work
 
 QT += 3dcore
 
@@ -79,8 +80,13 @@ DISTFILES += \
 
 win32 {
     LIBS += -lole32 -lOleAut32 -lstrmiids
+
+CONFIG(debug, debug|release) {
     LIBS += -LC:\Qt\opencv-4.11.0\build\lib\Debug -lopencv_world4110d
-#    LIBS += -LC:\Qt\opencv-4.11.0\buildMinGW\lib -lopencv_world4110   # opencv_videoio4110 -lopencv_core4110 -lopencv_highgui4110 -lopencv_imgproc4110 -lopencv_imgcodecs4110
+}
+CONFIG(release, debug|release) {
+    LIBS += -LC:\Qt\opencv-4.11.0\build\lib\Release -lopencv_world4110
+}
 
     INCLUDEPATH += C:/Qt/opencv-4.11.0/build/install/include
 

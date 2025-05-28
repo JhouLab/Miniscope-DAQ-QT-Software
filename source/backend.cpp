@@ -25,6 +25,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
 
+#include <iostream>
 #include <filesystem>
 #include <fstream>
 
@@ -108,6 +109,11 @@ backEnd::backEnd(QObject *parent) :
 
 //    QObject::connect(this, SIGNAL (userConfigFileNameChanged()), this, SLOT( handleUserConfigFileNameChanged() ));
 
+#ifdef _DEBUG
+    std::filesystem::path currentPath = std::filesystem::current_path();
+    qDebug() << "Current directory: ";
+    qDebug() << QString::fromStdString(currentPath.string());
+#endif
 
     file.setFileName("deviceConfigs/userConfigProps.json");
     status = file.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -125,10 +131,11 @@ backEnd::backEnd(QObject *parent) :
 
 void backEnd::loadDefaultConfig(QObject* root)
 {
-    QString homePath = QDir::homePath();
+    QString basePath = QDir::currentPath();  //  ::homePath();
+    QString fname = basePath + "/userConfigs/DefaultConfig.json";
 
     QMessageBox msgBox;
-    msgBox.setText("Load default configuration? (./miniscopeConfigs/MiniscopeDefault.json)");
+    msgBox.setText("Load default configuration file?\n\nPath to file: " + fname);
     msgBox.setWindowTitle("");
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::No);
@@ -138,11 +145,9 @@ void backEnd::loadDefaultConfig(QObject* root)
     if (ret != QMessageBox::Yes)
         return;
 
-    QString fname = homePath + "/miniscopeConfigs/MiniscopeDefault.json";
-
     std::ifstream file(fname.toStdString()); //, std::ifstream::in);
     if (!file.good()) {
-        QMessageBox::warning(NULL, "Warning", "Could not find config file \"" + fname + "\".");
+        QMessageBox::warning(NULL, "Warning", "Could not find config file:\n\n" + fname);
         return;
     }
 

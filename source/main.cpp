@@ -18,7 +18,10 @@
 //C:\Qt\5.12.6>C:\Qt\5.12.6\msvc2017_64\bin\windeployqt.exe --qmldir C:\Users\DBAharoni\Documents\Projects\Miniscope-DAQ-QT-Software\Miniscope-DAQ-QT-Software\ C:\Users\DBAharoni\Documents\Projects\Miniscope-DAQ-QT-Software\build-Miniscope-DAQ-QT-Software-Desktop_Qt_5_12_6_MSVC2017_64bit-Release\release\Miniscope-DAQ-QT-Software.exe
 int main(int argc, char *argv[])
 {
-    printf("Hello\n");
+    printf("\nThis is a JhouLab custom-built version of Miniscope-DAQ-QT, that auto-detects the Miniscope port number.\n");
+    printf("Specifying deviceID = -1 enables auto-detection.\n\n");
+    printf("You may see a few pages of warnings after this message. Most can be safely ignored.\n\n");
+
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
