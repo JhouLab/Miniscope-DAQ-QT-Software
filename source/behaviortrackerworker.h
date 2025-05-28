@@ -15,8 +15,6 @@
 #ifdef USE_PYTHON
  #undef slots
  #undef _DEBUG
- #undef Py_DEBUG
- #undef Py_REF_DEBUG
  #include <Python.h>
  #define slots
  #define _DEBUG

@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 {
     printf("\nThis is a JhouLab custom-built version of Miniscope-DAQ-QT, that auto-detects the Miniscope port number.\n");
     printf("Specifying deviceID = -1 enables auto-detection.\n\n");
-    printf("You may see a few pages of warnings after this message. Most can be safely ignored.\n\n");
+    printf("You may see a few pages of OpenCV warnings after this message. These come from the original code (not mine) and seem to be ignorable.\n\n\n\n");
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 

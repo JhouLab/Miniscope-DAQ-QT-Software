@@ -20,9 +20,7 @@
 #include "videodisplay.h"
 #include "newquickview.h"
 
-#undef _DEBUG
 #include <opencv2/opencv.hpp>
-#define _DEBUG
 
 // ------- Defines for UVC to I2C communication ----------
 // Will be replaced once Miniscope communication is moved to vendor class USB

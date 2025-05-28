@@ -79,7 +79,7 @@ DISTFILES += \
     ../deviceConfigs/videoDevices.json
 
 win32 {
-    LIBS += -lole32 -lOleAut32 -lstrmiids
+    LIBS += -lole32 -lOleAut32 -lstrmiids  # Need this for enumerating cameras
 
 CONFIG(debug, debug|release) {
     LIBS += -LC:\Qt\opencv-4.11.0\build\lib\Debug -lopencv_world4110d
@@ -101,9 +101,20 @@ CONFIG(release, debug|release) {
 }
 
 # Move user and device configs to build directory
-copydata.commands = $(COPY_DIR) \"$$shell_path($$PWD\\..\\deviceConfigs)\" \"$$shell_path($$OUT_PWD\\release\\deviceConfigs)\"
-copydata2.commands = $(COPY_DIR) \"$$shell_path($$PWD\\..\\userConfigs)\" \"$$shell_path($$OUT_PWD\\release\\userConfigs)\"
-copydata3.commands = $(COPY_DIR) \"$$shell_path($$PWD\\..\\Scripts)\" \"$$shell_path($$OUT_PWD\\release\\Scripts)\"
+CONFIG(release, debug|release) {
+    DEST2 = release
+}
+CONFIG(debug, debug|release) {
+    DEST2 = debug
+}
+
+message("Variable OUT_PWD: $$OUT_PWD")
+message("Variable DEST2: $$DEST2")
+message("Variable: $$shell_path($$OUT_PWD\\$$DEST2\\deviceConfigs)")
+
+copydata.commands = $(COPY_DIR) \"$$shell_path($$PWD\\..\\deviceConfigs)\" \"$$shell_path($$OUT_PWD\\$$DEST2\\deviceConfigs)\"
+copydata2.commands = $(COPY_DIR) \"$$shell_path($$PWD\\..\\userConfigs)\" \"$$shell_path($$OUT_PWD\\$$DEST2\\userConfigs)\"
+copydata3.commands = $(COPY_DIR) \"$$shell_path($$PWD\\..\\Scripts)\" \"$$shell_path($$OUT_PWD\\$$DEST2\\Scripts)\"
 first.depends = $(first) copydata copydata2 copydata3
 export(first.depends)
 export(copydata.commands)

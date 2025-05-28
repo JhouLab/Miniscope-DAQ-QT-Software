@@ -362,13 +362,15 @@ QStandardItem *backEnd::handleJsonArray(QStandardItem *parent, QJsonArray arry, 
 //    QStringList keys = obj.keys();
 //    type = type.right(6);
     if(type.length() >= 7){
+        // Convert string like "Array(Integer)" to "Integer"
         type = type.right(type.length() - 6);
         type = type.chopped(1);
+    } else {
+        // Sometimes we have an empty type string, and the above fails. Leave type unchanged, and issue warning.
+        qDebug() << "Empty type string: \"" << type << "\"";
     }
-    qDebug() << "TYPE" << type;
     if (type.length() >= 5) {
         if (type != "String" && type != "Bool" && type != "Integer" && type != "Double" && type != "Number" && type != "Object" && type.left(5) != "Array") {
-            qDebug() << "TYPE" << type;
             type = "String";
         }
     } else {
