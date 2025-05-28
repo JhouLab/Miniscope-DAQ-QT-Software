@@ -1,32 +1,36 @@
 How to build Miniscope-DAQ-QT from source code for WINDOWS:
 
-Get source code here: https://github.com/Aharoni-Lab/Miniscope-DAQ-QT-Software
+Make sure you have the various tools and compilers:
+1. Visual Studio 2022, community edition: https://visualstudio.microsoft.com/vs/community/
+2. CMake: https://cmake.org/download/
+3. C++ compiler for Visual Studio 2017. Must be this older version, since we also have to install older Qt5, which only works with older compiler:
+   https://download.visualstudio.microsoft.com/download/pr/8729ca3d-c3b2-4b32-b6fb-a7ea468a4af2/4448a86b1ae7d5b90bdc9c51e3f18b8f6ab0d3176560aa23b03f102380e02746/vs_Community.exe
+   (The above link is no longer available on the Microsoft website, but it still works, and I found it linked here: https://www.reddit.com/r/VisualStudio/comments/1all0d4/is_visual_studio_2017_community_version_still/)
+4. Qt 5.14.2: https://download.qt.io/archive/qt/5.14/5.14.2/
+5. Qt Creator 4.14.2 (4.11 also works. Newer versions haven't been tested): https://download.qt.io/archive/qtcreator/4.14/4.14.2/qt-creator-opensource-windows-x86_64-4.14.2.exe
 
-Download C++ compiler for Visual Studio 2017, since Qt5 only works with older compiler:
-https://download.visualstudio.microsoft.com/download/pr/8729ca3d-c3b2-4b32-b6fb-a7ea468a4af2/4448a86b1ae7d5b90bdc9c51e3f18b8f6ab0d3176560aa23b03f102380e02746/vs_Community.exe
+Now download the various sources:
 
-(The above link is no longer available on the Microsoft website, but it still works, and I found it linked here: https://www.reddit.com/r/VisualStudio/comments/1all0d4/is_visual_studio_2017_community_version_still/)
+1. Miniscope source: https://github.com/Aharoni-Lab/Miniscope-DAQ-QT-Software
+2. OpenCV 4.11 source. To force this release, go to the release page:
+   https://github.com/opencv/opencv/releases
+   https://github.com/opencv/opencv
 
-Install Qt 5.14.2: https://download.qt.io/archive/qt/5.14/5.14.2/
-Install Qt Creator 4.14.2 (4.11 also works. Newer versions haven't been tested): https://download.qt.io/archive/qtcreator/4.14/4.14.2/qt-creator-opensource-windows-x86_64-4.14.2.exe
-
-Clone opencv GitHub repository. Latest version is 4.12: https://github.com/opencv/opencv
 Make a "build" subfolder within the opencv folder
-Install CMake: https://cmake.org/download/
 
 OPTIONAL (actually don't do this, as I couldn't get it to work, and you don't need it on Windows): Add System Environment Variable GSTREAMER_ROOT_X86_64 = C:\Program Files\gstreamer\1.0\msvc_x86_64
 
-Run CMake, set source and destination folders as opencv and opencv/build. Click Configure, choose Visual Studio as generator, then click Generate.
-Open *.sln file (created by CMake) in Visual Studio. Right click "Install" project, and click "build".
+Now start working:
 
-Create a conda/mamba environment with Python3.8 (no other version will work)
-Copy the file libs\python38.lib to python38_d.lib (to mimic debug version)
+1. Run CMake, set source and destination folders as opencv and opencv/build. Click Configure, choose Visual Studio as generator, then click Generate.
+2. Open *.sln file (created by CMake) in Visual Studio. Right click "Install" project, and click "build".
+3. Create a conda/mamba environment with Python3.8 (no other version will work). Copy the file libs\python38.lib to python38_d.lib (to mimic debug version)
+4. Put these lines around the #include <Python.h> statement in behaviortracker.h and behaviortrackerworker.h.
+   This will allow use of release Python module. You don't need to do this for the corresponding *.cpp files.
+   #undef _DEBUG    <this line goes before #include <Python.h>
+   #define _DEBUG   <this line goes after #include <Python.h>
 
-Put these lines around the #include <Python.h> statement in behaviortracker.h and behaviortrackerworker.h. This will allow use of release Python module. You don't need to do this for the corresponding *.cpp files.
-#undef _DEBUG    <this line goes before #include <Python.h>
-#define _DEBUG   <this line goes after #include <Python.h>
-
-Set LIB and INCLUDE folders in the *.pro file (your directories may be slightly different):
+   Set LIB and INCLUDE folders in the *.pro file (your directories may be slightly different):
 
 CONFIG(debug, debug|release) {
     LIBS += -LC:\Qt\opencv-4.11.0\build\lib\Debug -lopencv_world4120d
@@ -40,30 +44,34 @@ CONFIG(release, debug|release) {
     INCLUDEPATH += C:\Users\tomjh\mambaforge\envs\miniscope\include
     LIBS += -LC:\Users\tomjh\mambaforge\envs\miniscope\libs -lpython38
 
-Program should now compile. But you still have to set up the runtime environment:
+Program should now compile. Congrats.
 
-Add to the *.pro file and environment (not sure if these are redundant):
-QML_IMPORT_PATH = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\qml
-QML2_IMPORT_PATH = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\qml
+Now set up the runtime environment:
 
-Copy .\deviceConfigs folder (with contents) to directory ABOVE the executable (Debug/Release) directory (because this is working directory in Qt Creator) AND the Debug/Release directory (working directory at runtime).
-Copy .\userConfigs folder (with contents) to directory ABOVE the executable (Debug/Release) directory (because this is working directory in Qt Creator) AND the Debug/Release directory (working directory at runtime). This is actually only needed for DefaultConfig.json.
+1. Add to the *.pro file and environment (not sure if these are redundant):
+   QML_IMPORT_PATH = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\qml
+   QML2_IMPORT_PATH = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\qml
 
-Copy the following DLLs to same directory as executable. Use *d.dll versions in Debug, and *.dll versions in Release folders. Your source folders might be slightly different:
+2. I've edited the *.pro file to copy .\deviceConfigs and .\userConfigs to the executable directory. However, when running in Qt Creator, the working directory is actually the parent folder,
+   so you should copy those folders to the parent folder too.
 
-C:\Users\tomjh\source\repos\JhouLab\opencv\build\install\x64\vc17\bin\opencv_videoio_ffmpeg4120_64.dll (no need to rename to *d.dll, this program can use either)
-C:\Users\tomjh\source\repos\JhouLab\opencv/build/bin/Debug/opencv_world412(d).dll
-Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\Qt5Core(d).dll
-Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\Qt5Gui(d).dll
-Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\QtQuick(d).dll
-Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\QtQmlModels(d).dll
-Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\QtNetwork(d).dll
-Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\Qt5Qml(d).dll
-python38d.dll (renamed from python38.dll)
-C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\plugins\platforms\qwindows(d).dll  ===> (executable directory)\platforms\
+3. Copy the following DLLs to the executable drirectory. Use *d.dll versions in Debug, and *.dll versions in Release folders. Your source folders might be slightly different:
+
+   C:\Users\tomjh\source\repos\JhouLab\opencv\build\install\x64\vc17\bin\opencv_videoio_ffmpeg4120_64.dll (no need to rename to *d.dll, this program can use either)
+   C:\Users\tomjh\source\repos\JhouLab\opencv/build/bin/Debug/opencv_world412(d).dll
+   Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\Qt5Core(d).dll
+   Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\Qt5Gui(d).dll
+   Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\QtQuick(d).dll
+   Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\QtQmlModels(d).dll
+   Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\QtNetwork(d).dll
+   Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\Qt5Qml(d).dll
+   python38d.dll (renamed from python38.dll)
+   C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\plugins\platforms\qwindows(d).dll  ===> (executable directory)\platforms\
 
 If you've missed any, try running the .exe file straight from the Windows folder (i.e. not in Qt Creator) and it will mostly tell you which DLLs are missing (with the exception of the last one, which will generate an error about being unable to initialize platform)
 
-Optionally can download H264 codec (must be old version 1.8): http://ciscobinary.openh264.org/openh264-1.8.0-win64.dll.bz2
-Use WinRAR to extract the single file within: openh264-1.8.0-win64.dll
-Chrome will warn about insecure download, click "Keep" button to download anyway.
+4. Optionally can download H264 codec (must be old version 1.8): http://ciscobinary.openh264.org/openh264-1.8.0-win64.dll.bz2
+   Use WinRAR to extract the single file within: openh264-1.8.0-win64.dll
+   Chrome will warn about insecure download, click "Keep" button to download anyway.
+
+Program should now run from Qt Creator, and if double clicked directly from executable folder.
