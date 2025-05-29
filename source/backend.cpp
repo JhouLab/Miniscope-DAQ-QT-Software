@@ -149,7 +149,14 @@ bool backEnd::loadDefaultConfig(QString fname)
     treeObj->setProperty("visible", true);
     viewObj->setProperty("visible", false);
 
-    QMessageBox::information(NULL, "Info", "Successfully loaded configuration file:\n\n" + fname);
+    std::filesystem::path p(fname.toStdString());
+    std::string f = p.filename().string();
+    std::string d = p.parent_path().string();
+
+    QMessageBox::information(NULL, "Info", "Successfully loaded configuration file: \"" +
+                             QString::fromStdString(f) +
+                             "\"\n\n... from folder: \"" +
+                             QString::fromStdString(d) + "\"");
 
     return true;
 }
