@@ -22,7 +22,9 @@ int main(int argc, char *argv[])
     printf("Specifying deviceID = -1 enables auto-detection.\n\n");
     printf("You may see a few pages of OpenCV warnings after this message. These come from the original code (not mine) and seem to be ignorable.\n\n\n\n");
 
-    QSettings settings("JhouLab", "MiniscopeDAQ");
+//    QSettings settings("JhouLab", "MiniscopeDAQ");
+
+//    settings.remove("DefaultConfig");
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
@@ -50,18 +52,18 @@ int main(int argc, char *argv[])
     engine.load(url);
 
     backend.root = qobject_cast<QObject *>(engine.rootObjects().value(0));
-    backend.qsettings = &settings;
+//    backend.qsettings = &settings;
 
     backend.setVersionNumber(VERSION_NUMBER);
 
-    QString config = settings.value("DefaultConfig").toString();
+//    QString config = settings.value("DefaultConfig").toString();
 
-    if (config != "") {
+//    if (config != "") {
         // Try to load previous config file.
-        if (!backend.loadDefaultConfig(config))
+//        if (!backend.loadDefaultConfig(config))
             // Previously stored settings file no longer exists. Remove from settings.
-            settings.remove("DefaultConfig");
-    }
+//            settings.remove("DefaultConfig");
+//    }
 //    qDebug() << "TTTEEEE" << engine.rootObjects().first()->findChild<QObject*>("treeView");
 //    QObject::connect(engine.rootObjects().first()->findChild<QObject*>("treeView"), &QTreeView::clicked, &backend, &backEnd::treeViewclicked);
     QObject::connect(&backend, &backEnd::closeAll, &engine, &QQmlApplicationEngine::quit);
