@@ -80,7 +80,8 @@ public:
 
     Q_INVOKABLE QString getConfigFileName() {
         std::filesystem::path p(m_userConfigFileName.toStdString());
-        return QString::fromStdString(p.filename().string());
+        QString q = QString::fromStdString(p.filename().string());
+        return q;
     }
 
     void loadUserConfigFile();

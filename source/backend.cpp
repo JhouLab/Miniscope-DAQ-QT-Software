@@ -580,10 +580,13 @@ void backEnd::loadUserConfigFile()
     file.setFileName(m_userConfigFileName);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     jsonFile = file.readAll();
-    setUserConfigDisplay("User Config File Selected: " + m_userConfigFileName + "\n" + jsonFile);
+
+    // setUserConfigDisplay("User Config File Selected: " + m_userConfigFileName + "\n" + jsonFile);
     file.close();
 
-    // Successfully opened config file and read its contents. Save this setting for future use.
+    // Successfully opened config file and read its contents.
+
+    // Save filename so that it will load automatically next time program is launched.
     qsettings->setValue("DefaultConfig", m_userConfigFileName);
 
     QJsonDocument d = QJsonDocument::fromJson(jsonFile.toUtf8());

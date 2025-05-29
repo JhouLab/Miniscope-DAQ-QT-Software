@@ -28,7 +28,7 @@ Window {
             backend.userConfigFileName = fileDialog.currentFile  // fileUrl
             treeView.visible = true;
             view.visible = false;
-//            rbRun.enabled = true
+            //            rbRun.enabled = true
         }
         onRejected: {
             console.log("Canceled")
@@ -84,10 +84,10 @@ Window {
                 font.family: "Arial"
                 wrapMode: Text.WordWrap
                 MouseArea {
-                        anchors.fill: parent
-                        acceptedButtons: Qt.NoButton // we don't want to eat clicks on the Text
-                        cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    }
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton // we don't want to eat clicks on the Text
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
             }
             Button {
                 text: "Close"
@@ -219,14 +219,52 @@ Window {
 
                     console.log(backend.userConfigFolderName)
                     fileSaveDialog.folder = backend.getConfigFolder()
-//                    fileSaveDialog.currentFile = backend.getConfigFileName()   // File name has prepended forward slash, which messes things up. Skip for now.
+                    // fileSaveDialog.currentFile = backend.getConfigFileName()   // File name has prepended forward slash, which messes things up. Skip for now.
                     fileSaveDialog.visible = true   // setVisible(1)
                 }
                 onHoveredChanged: hovered ? configSaveRect.color = "#f8a7fd" : configSaveRect.color = "#a8a7fd"
 
             }
         }
+        TabBar {
+            id: tabBar
+            width: 240
+            transformOrigin: Item.Center
+            Layout.preferredHeight: 40
+            Layout.fillWidth: true
+
+            TabButton {
+                id: tabButtonShowInfo
+                x: 0
+                y: 0
+                width: 345
+                height: 40
+                text: qsTr("Show Info")
+                transformOrigin: Item.Center
+                onClicked: {
+                    view.visible = true
+                    treeView.visible = false
+                }
+            }
+
+            TabButton {
+                id: tabButtonShowConfig
+                y: 0
+                width: 355
+                height: 40
+                text: qsTr("Show Config")
+                scale: 1
+                anchors.left: parent.left
+                anchors.leftMargin: 345
+                onClicked: {
+                    view.visible = false
+                    treeView.visible = true
+                }
+            }
+        }
+
         ColumnLayout {
+            spacing: 5
             TreeViewerJSON {
                 id: treeView
                 objectName: "treeView"
@@ -265,7 +303,7 @@ Window {
                     verticalAlignment: Text.AlignTop
                     visible: treeView.visible
 
-    //                height: 200
+                    //                height: 200
                     Layout.fillHeight: true
 
                     Layout.fillWidth: true
@@ -274,9 +312,10 @@ Window {
                     wrapMode: TextArea.WordWrap
                     textFormat: Text.RichText
                     font.pointSize: 12
-            }
+                }
             }
         }
+
 
         ScrollView {
             id: view
@@ -293,9 +332,9 @@ Window {
             TextArea {
                 id: taConfigDesc
                 text: backend.userConfigDisplay
-//                wrapMode: Text.NoWrap
-                                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                                //                anchors.fill: parent
+                //                wrapMode: Text.NoWrap
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                //                anchors.fill: parent
                 font.pointSize: 12
                 readOnly: true
                 background: Rectangle {
@@ -317,7 +356,7 @@ Window {
                             view.visible = false;
 
                         }
-            //            rbRun.enabled = true
+                        //            rbRun.enabled = true
                     }
                 }
             }
@@ -403,9 +442,10 @@ Window {
                 }
                 onHoveredChanged: hovered ? exitRect.color = "#f8a7fd" : exitRect.color = "#a8a7fd"
                 onClicked: backend.exitClicked()
-//                onClicked: Qt.quit()
+                //                onClicked: Qt.quit()
             }
         }
+
 
     }
 
