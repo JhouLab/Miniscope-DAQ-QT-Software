@@ -1,6 +1,8 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
+#include <filesystem>
+
 #include <QObject>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -8,6 +10,7 @@
 #include <QString>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QSettings>
 
 #include "miniscope.h"
 #include "behaviorcam.h"
@@ -22,6 +25,7 @@ class backEnd : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QString userConfigFileName READ userConfigFileName WRITE setUserConfigFileName NOTIFY userConfigFileNameChanged)
+    Q_PROPERTY(QString userSaveConfigFileName READ userSaveConfigFileName WRITE setUserSaveConfigFileName NOTIFY userSaveConfigFileNameChanged)
     Q_PROPERTY(QString userConfigDisplay READ userConfigDisplay WRITE setUserConfigDisplay NOTIFY userConfigDisplayChanged)
     Q_PROPERTY(bool userConfigOK READ userConfigOK WRITE setUserConfigOK NOTIFY userConfigOKChanged)
     Q_PROPERTY(QString availableCodecList READ availableCodecList WRITE setAvailableCodecList NOTIFY availableCodecListChanged)
@@ -30,12 +34,20 @@ class backEnd : public QObject
     Q_PROPERTY(QStandardItemModel* jsonTreeModel READ jsonTreeModel WRITE setJsonTreeModel NOTIFY jsonTreeModelChanged)
 
 public:
-    void loadDefaultConfig(QObject *root);
+    QObject *root;
+    QSettings *qsettings;
+
+    bool loadDefaultConfig(QString fname);
 
     explicit backEnd(QObject *parent = nullptr);
 
     QString userConfigFileName() {return m_userConfigFileName;}
     void setUserConfigFileName(const QString &input);
+
+    QString tmp_folder;
+
+    QString userSaveConfigFileName() {return m_userSaveConfigFileName;}
+    void setUserSaveConfigFileName(const QString &input);
 
     bool userConfigOK() {return m_userConfigOK;}
     void setUserConfigOK(bool userConfigOK) {m_userConfigOK = userConfigOK;}
@@ -59,8 +71,17 @@ public:
     void generateUserConfigFromModel();
     QJsonObject getObjectFromModel(QModelIndex index);
     QJsonArray getArrayFromModel(QModelIndex index);
-    Q_INVOKABLE void saveConfigObject();
+    Q_INVOKABLE void saveConfigObject(QString saveFileName="");
+    Q_INVOKABLE QString getConfigFolder() {
+        std::filesystem::path p(m_userConfigFileName.toStdString());
+        std::filesystem::path p1 = p.parent_path();
+        return QString::fromStdString(p1.string());
+    }
 
+    Q_INVOKABLE QString getConfigFileName() {
+        std::filesystem::path p(m_userConfigFileName.toStdString());
+        return QString::fromStdString(p.filename().string());
+    }
 
     void loadUserConfigFile();
     bool checkUserConfigForIssues();
@@ -77,6 +98,8 @@ public:
 
 signals:
     void userConfigFileNameChanged();
+    void userSaveConfigFileNameChanged();
+    void userConfigFolderNameChanged();
     void userConfigDisplayChanged();
     void userConfigOKChanged();
     void availableCodecListChanged();
@@ -105,6 +128,7 @@ private:
 
     QString m_versionNumber;
     QString m_userConfigFileName;
+    QString m_userSaveConfigFileName;
     QString m_userConfigDisplay;
     bool m_userConfigOK;
     QJsonObject m_userConfig;

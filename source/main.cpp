@@ -6,7 +6,7 @@
 #include <QDebug>
 #include <QObject>
 #include <QTreeView>
-
+#include <QSettings>
 #include <QThreadPool>
 
 #include "backend.h"
@@ -21,6 +21,8 @@ int main(int argc, char *argv[])
     printf("\nThis is a JhouLab custom-built version of Miniscope-DAQ-QT, that auto-detects the Miniscope port number.\n");
     printf("Specifying deviceID = -1 enables auto-detection.\n\n");
     printf("You may see a few pages of OpenCV warnings after this message. These come from the original code (not mine) and seem to be ignorable.\n\n\n\n");
+
+    QSettings settings("JhouLab", "MiniscopeDAQ");
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
@@ -47,10 +49,19 @@ int main(int argc, char *argv[])
 
     engine.load(url);
 
-    QObject *root = qobject_cast<QObject *>(engine.rootObjects().value(0));
+    backend.root = qobject_cast<QObject *>(engine.rootObjects().value(0));
+    backend.qsettings = &settings;
 
     backend.setVersionNumber(VERSION_NUMBER);
-    backend.loadDefaultConfig(root);
+
+    QString config = settings.value("DefaultConfig").toString();
+
+    if (config != "") {
+        // Try to load previous config file.
+        if (!backend.loadDefaultConfig(config))
+            // Previously stored settings file no longer exists. Remove from settings.
+            settings.remove("DefaultConfig");
+    }
 //    qDebug() << "TTTEEEE" << engine.rootObjects().first()->findChild<QObject*>("treeView");
 //    QObject::connect(engine.rootObjects().first()->findChild<QObject*>("treeView"), &QTreeView::clicked, &backend, &backEnd::treeViewclicked);
     QObject::connect(&backend, &backEnd::closeAll, &engine, &QQmlApplicationEngine::quit);

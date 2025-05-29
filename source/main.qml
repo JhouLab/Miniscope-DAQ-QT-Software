@@ -2,7 +2,8 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.2
+// import QtQuick.Dialogs 1.2
+import Qt.labs.platform 1.0
 
 Window {
     id: root
@@ -24,7 +25,7 @@ Window {
         nameFilters: [ "JSON files (*.json)", "All files (*)" ]
         onAccepted: {
             // Send file name to c++ backend
-            backend.userConfigFileName = fileDialog.fileUrl
+            backend.userConfigFileName = fileDialog.currentFile  // fileUrl
             treeView.visible = true;
             view.visible = false;
 //            rbRun.enabled = true
@@ -35,6 +36,24 @@ Window {
         visible: false
     }
 
+
+    FileDialog {
+        // Used to save config file
+
+        id: fileSaveDialog
+        title: "Please choose file to save to."
+        nameFilters: [ "JSON files (*.json)", "All files (*)" ]
+        fileMode: FileDialog.SaveFile
+        defaultSuffix: "json"
+        onAccepted: {
+            // Send file name to c++ backend
+            backend.userSaveConfigFileName = fileSaveDialog.currentFile  // fileUrl
+        }
+        onRejected: {
+            console.log("Canceled")
+        }
+        visible: false
+    }
 
     Window {
         id: helpDialog
@@ -156,7 +175,7 @@ Window {
                 radius: 10
 
                 Layout.minimumWidth: 20
-                Layout.preferredWidth: 400
+                Layout.preferredWidth: 300
                 Layout.maximumWidth: 600
 
                 background: Rectangle {
@@ -165,7 +184,7 @@ Window {
                     border.width: 1
                     color: "#a8a7fd"
                 }
-                onClicked: fileDialog.setVisible(1)
+                onClicked: fileDialog.visible = true //(1)
                 onHoveredChanged: hovered ? configRect.color = "#f8a7fd" : configRect.color = "#a8a7fd"
 
             }
@@ -173,7 +192,7 @@ Window {
             RoundButton {
                 id: rbSaveUserConfig
                 height: 40
-                text: "Save User Config File"
+                text: "Save Config As"
                 Layout.minimumHeight: 40
                 Layout.preferredHeight: 40
                 Layout.fillHeight: false
@@ -186,8 +205,8 @@ Window {
                 radius: 10
                 enabled: backend.userConfigOK
 
-                Layout.minimumWidth: 100
-                Layout.preferredWidth: 200
+                Layout.minimumWidth: 150
+                Layout.preferredWidth: 250
                 Layout.maximumWidth: 700
 
                 background: Rectangle {
@@ -198,8 +217,10 @@ Window {
                 }
                 onClicked: {
 
-                    backend.saveConfigObject()
-                    saveMessageDialog.visible = true
+                    console.log(backend.userConfigFolderName)
+                    fileSaveDialog.folder = backend.getConfigFolder()
+//                    fileSaveDialog.currentFile = backend.getConfigFileName()   // File name has prepended forward slash, which messes things up. Skip for now.
+                    fileSaveDialog.visible = true   // setVisible(1)
                 }
                 onHoveredChanged: hovered ? configSaveRect.color = "#f8a7fd" : configSaveRect.color = "#a8a7fd"
 

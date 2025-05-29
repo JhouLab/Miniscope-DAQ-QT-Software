@@ -18,6 +18,7 @@
 #include <QStandardItem>
 #include <QModelIndex>
 #include <QMessageBox>
+#include <QSettings>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -105,7 +106,7 @@ backEnd::backEnd(QObject *parent) :
     initDisplayMessage.append("Available compression Codecs on your computer are:\n\t" + m_availableCodecList +
                               "\n\nUnavailable compression Codes on your computer are:\n\t" + tempStr.chopped(2));
 
-            setUserConfigDisplay(initDisplayMessage);
+    setUserConfigDisplay(initDisplayMessage);
 
 //    QObject::connect(this, SIGNAL (userConfigFileNameChanged()), this, SLOT( handleUserConfigFileNameChanged() ));
 
@@ -126,29 +127,14 @@ backEnd::backEnd(QObject *parent) :
     else {
         // Can't find config props file. Possibly throw an error/warning somewhere???
     }
-
 }
 
-void backEnd::loadDefaultConfig(QObject* root)
+bool backEnd::loadDefaultConfig(QString fname)
 {
-    QString basePath = QDir::currentPath();  //  ::homePath();
-    QString fname = basePath + "/userConfigs/DefaultConfig.json";
-
-    QMessageBox msgBox;
-    msgBox.setText("Load default configuration file?\n\nPath to file: " + fname);
-    msgBox.setWindowTitle("");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-
-    int ret = msgBox.exec();
-
-    if (ret != QMessageBox::Yes)
-        return;
-
     std::ifstream file(fname.toStdString()); //, std::ifstream::in);
     if (!file.good()) {
         QMessageBox::warning(NULL, "Warning", "Could not find config file:\n\n" + fname);
-        return;
+        return false;
     }
 
     m_userConfigFileName = fname;
@@ -162,6 +148,7 @@ void backEnd::loadDefaultConfig(QObject* root)
 
     treeObj->setProperty("visible", true);
     viewObj->setProperty("visible", false);
+    return true;
 }
 
 void backEnd::setUserConfigFileName(const QString &input)
@@ -180,6 +167,24 @@ void backEnd::setUserConfigFileName(const QString &input)
         setUserConfigDisplay("Must select a .json User Config File.");
     }
 }
+
+void backEnd::setUserSaveConfigFileName(const QString &input)
+{
+    const QUrl url(input);
+    QString furl = url.toLocalFile();
+    if (furl.contains(".json")) {
+        if (furl != m_userSaveConfigFileName) {
+            m_userSaveConfigFileName = furl;
+            //emit userConfigFileNameChanged();
+        }
+
+        saveConfigObject();
+    }
+    else {
+        setUserConfigDisplay("Must select a .json User Config File.");
+    }
+}
+
 
 void backEnd::setUserConfigDisplay(const QString &input)
 {
@@ -545,15 +550,19 @@ QJsonArray backEnd::getArrayFromModel(QModelIndex idx)
     return jAry;
 }
 
-void backEnd::saveConfigObject()
+void backEnd::saveConfigObject(QString saveFilename)
 {
     generateUserConfigFromModel();
     QJsonDocument d;
     d.setObject(m_userConfig);
     QFile file;
-    QString fName = m_userConfigFileName;
-    fName.chop(5);
-    fName.append("_new.json");
+    QString fName;
+
+    if (saveFilename=="")
+        fName = m_userSaveConfigFileName;
+    else
+        fName = saveFilename;
+
     file.setFileName(fName);
     file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
     file.write(d.toJson());
@@ -573,6 +582,10 @@ void backEnd::loadUserConfigFile()
     jsonFile = file.readAll();
     setUserConfigDisplay("User Config File Selected: " + m_userConfigFileName + "\n" + jsonFile);
     file.close();
+
+    // Successfully opened config file and read its contents. Save this setting for future use.
+    qsettings->setValue("DefaultConfig", m_userConfigFileName);
+
     QJsonDocument d = QJsonDocument::fromJson(jsonFile.toUtf8());
     m_userConfig = d.object();
 
@@ -628,7 +641,6 @@ void backEnd::loadUserConfigFile()
 
 void backEnd::onRunClicked()
 {
-//    qDebug() << "Run was clicked!";
     generateUserConfigFromModel();
     parseUserConfig();
     checkUserConfigForIssues();
@@ -641,7 +653,6 @@ void backEnd::onRunClicked()
     else {
         // TODO: throw out error
     }
-
 }
 
 void backEnd::onRecordClicked()
@@ -655,11 +666,16 @@ void backEnd::exitClicked()
 {
     // TODO: Do other exit stuff such as stop recording???
     emit closeAll();
-
 }
 
 void backEnd::handleUserConfigFileNameChanged()
 {
+    std::filesystem::path p(m_userConfigFileName.toStdString());
+    std::filesystem::path p1 = p.parent_path();
+    QString q0 = QString::fromStdString(p.string());
+    tmp_folder = "file:///" + q0;
+    userConfigFolderNameChanged();
+
     loadUserConfigFile();
     constructJsonTreeModel();
     parseUserConfig();
@@ -668,15 +684,11 @@ void backEnd::handleUserConfigFileNameChanged()
 
 void backEnd::connectSnS()
 {
-
     // Start and stop recording signals
     QObject::connect(controlPanel, SIGNAL( recordStart(QMap<QString,QVariant>)), dataSaver, SLOT (startRecording(QMap<QString,QVariant>)));
     QObject::connect(controlPanel, SIGNAL( recordStop()), dataSaver, SLOT (stopRecording()));
     QObject::connect((controlPanel), SIGNAL( sendNote(QString) ), dataSaver, SLOT ( takeNote(QString) ));
     QObject::connect(this, SIGNAL( closeAll()), controlPanel, SLOT (close()));
-
-
-
     QObject::connect(dataSaver, SIGNAL(sendMessage(QString)), controlPanel, SLOT( receiveMessage(QString)));
 
     for (int i = 0; i < miniscope.length(); i++) {
