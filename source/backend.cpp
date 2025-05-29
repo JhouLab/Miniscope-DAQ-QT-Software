@@ -148,6 +148,9 @@ bool backEnd::loadDefaultConfig(QString fname)
 
     treeObj->setProperty("visible", true);
     viewObj->setProperty("visible", false);
+
+    QMessageBox::information(NULL, "Info", "Successfully loaded configuration file:\n\n" + fname);
+
     return true;
 }
 
