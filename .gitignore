@@ -78,6 +78,6 @@ build-*
 
 
 # Want to include open_cv binaries
-!opencv*_lib/*
+!opencv*/*
 
 
