@@ -86,6 +86,7 @@ equals (MACHINE_ID, 0) {
     OPENCV_ROOT = ..\opencv411   # These are precompiled libraries and headers
     PYTHON_DIR = C:\Users\tomjh\mambaforge\envs\acq4
     QT_BASE_DIR = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64    # This is used to find Qt DLLs to copy to build directory
+    OPENCV_DLL_DIR = C:\Users\tomjh\TomJhou Dropbox\JhouLab\Installers\Miniscope\opencv411\bin\\$$DEST1
 }
 
 equals (MACHINE_ID, 1) {
@@ -93,6 +94,7 @@ equals (MACHINE_ID, 1) {
     OPENCV_ROOT = ..\opencv411   # These are precompiled libraries and headers
     PYTHON_DIR = C:/ProgramData/miniforge3/envs/acq4
     QT_BASE_DIR = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64    # This is used to find Qt DLLs to copy to build directory
+    OPENCV_DLL_DIR = D:\TomJhou Dropbox\JhouLab\Installers\Miniscope\opencv411\bin\\$$DEST1
 }
 
 equals (MACHINE_ID, 2) {
@@ -115,7 +117,6 @@ CONFIG(debug, debug|release) {
 }
 
 OPENCV_LIB_DIR = $$OPENCV_ROOT\lib\\$$DEST1
-OPENCV_DLL_DIR = $$OPENCV_ROOT\bin\\$$DEST1
 OPENCV_FILE = opencv_world4110$$QT_SUFFIX
 
 win32 {

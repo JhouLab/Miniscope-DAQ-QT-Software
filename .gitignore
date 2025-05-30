@@ -77,7 +77,8 @@ build-*
 *.exe
 
 
-# Want to include open_cv binaries
+# Want to include open_cv binaries.
+# Note that the World DLLs are too big.
 !opencv*/*
 
 
