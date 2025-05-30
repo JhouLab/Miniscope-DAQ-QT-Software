@@ -78,6 +78,18 @@ DISTFILES += \
     ../deviceConfigs/userConfigProps.json \
     ../deviceConfigs/videoDevices.json
 
+# Move user and device configs to build directory
+CONFIG(release, debug|release) {
+    DEST1 = Release
+    DEST2 = release
+    QT_SUFFIX = ""
+}
+CONFIG(debug, debug|release) {
+    DEST1 = Debug
+    DEST2 = debug
+    QT_SUFFIX = "d"
+}
+
 MACHINE_ID = 0   # 0 for home PC, 1 for work PC, 2 for laptop
 
 # The following folders are machine and installation-specific
@@ -86,7 +98,7 @@ equals (MACHINE_ID, 0) {
     OPENCV_ROOT = ..\opencv411   # These are precompiled libraries and headers
     PYTHON_DIR = C:\Users\tomjh\mambaforge\envs\acq4
     QT_BASE_DIR = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64    # This is used to find Qt DLLs to copy to build directory
-    OPENCV_DLL_DIR = C:\Users\tomjh\TomJhou Dropbox\JhouLab\Installers\Miniscope\opencv411\bin\\$$DEST1
+    OPENCV_DLL_DIR = C:/Users/tomjh/TomJhou Dropbox/JhouLab/Installers/Miniscope/opencv411/bin/$$DEST1/  # No quotes here, but need quotes below after appending filename
 }
 
 equals (MACHINE_ID, 1) {
@@ -104,17 +116,6 @@ equals (MACHINE_ID, 2) {
     QT_BASE_DIR = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64    # This is used to find Qt DLLs to copy to build directory
 }
 
-# Move user and device configs to build directory
-CONFIG(release, debug|release) {
-    DEST1 = Release
-    DEST2 = release
-    QT_SUFFIX = ""
-}
-CONFIG(debug, debug|release) {
-    DEST1 = Debug
-    DEST2 = debug
-    QT_SUFFIX = "d"
-}
 
 OPENCV_LIB_DIR = $$OPENCV_ROOT\lib\\$$DEST1
 OPENCV_FILE = opencv_world4110$$QT_SUFFIX
@@ -171,7 +172,7 @@ QMAKE_EXTRA_TARGETS += copydata
 first.depends += copydata
 
 # List of files to be copied to target directory
-FILELIST  = $$OPENCV_DLL_DIR\\$${OPENCV_FILE}.dll
+FILELIST  = "$$OPENCV_DLL_DIR$${OPENCV_FILE}.dll"   # Need quotes here or else it doesn't work.
 FILELIST += $$OPENCV_ROOT\\opencv_videoio_ffmpeg4110_64.dll
 
 FILELIST += $$PYTHON_DIR\\python38.dll
