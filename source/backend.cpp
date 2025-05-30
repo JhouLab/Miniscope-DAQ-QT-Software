@@ -146,8 +146,10 @@ bool backEnd::loadDefaultConfig(QString fname)
     QObject *treeObj = root->findChild<QObject*>("treeView");  // Search by objectName (NOT id)
     QObject *viewObj = root->findChild<QObject*>("view");
 
-    treeObj->setProperty("visible", true);
-    viewObj->setProperty("visible", false);
+    if (treeObj != nullptr)
+        treeObj->setProperty("visible", true);
+    if (viewObj != nullptr)
+        viewObj->setProperty("visible", false);
 
     std::filesystem::path p(fname.toStdString());
     std::string f = p.filename().string();
