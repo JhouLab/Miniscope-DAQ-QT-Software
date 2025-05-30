@@ -90,7 +90,7 @@ CONFIG(debug, debug|release) {
     QT_SUFFIX = "d"
 }
 
-MACHINE_ID = 0   # 0 for home PC, 1 for work PC, 2 for laptop
+MACHINE_ID = 1   # 0 for home PC, 1 for work PC, 2 for laptop
 
 # The following folders are machine and installation-specific
 equals (MACHINE_ID, 0) {
@@ -106,7 +106,7 @@ equals (MACHINE_ID, 1) {
     OPENCV_ROOT = ..\opencv411   # These are precompiled libraries and headers
     PYTHON_DIR = C:/ProgramData/miniforge3/envs/acq4
     QT_BASE_DIR = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64    # This is used to find Qt DLLs to copy to build directory
-    OPENCV_DLL_DIR = D:\TomJhou Dropbox\JhouLab\Installers\Miniscope\opencv411\bin\\$$DEST1
+    OPENCV_DLL_DIR = D:\TomJhou Dropbox\JhouLab\Installers\Miniscope\opencv411\bin\\$$DEST1\\  # Need double backslash at the end, but not before. Why???
 }
 
 equals (MACHINE_ID, 2) {
