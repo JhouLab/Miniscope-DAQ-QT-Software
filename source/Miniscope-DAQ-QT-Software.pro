@@ -192,7 +192,7 @@ FILELIST += $$QT_DLL_DIR\\Qt5QmlWorkerScript$${QT_SUFFIX}.dll
 win32:TARGET_DIR ~= s,/,\\,g
 for(FILE, FILELIST) {
     win32:FILE ~= s,/,\\,g
-    $$basename(FILE).depends = $$shell_quote($$FILE)
+    $$basename(FILE).depends = $$quote($$FILE)   # For some reason, shell_quote here fails if path name has space
     $$basename(FILE).target = $${TARGET_DIR}/$$basename(FILE)
     $$basename(FILE).commands = $(COPY_FILE) $$shell_quote($$FILE) $$shell_quote($${TARGET_DIR})
     export($$basename(FILE).commands)
