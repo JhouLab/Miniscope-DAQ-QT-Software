@@ -90,15 +90,15 @@ CONFIG(debug, debug|release) {
     QT_SUFFIX = "d"
 }
 
-MACHINE_ID = 1   # 0 for home PC, 1 for work PC, 2 for laptop
+MACHINE_ID = 0   # 0 for home PC, 1 for work PC, 2 for laptop
 
 # The following folders are machine and installation-specific
 equals (MACHINE_ID, 0) {
     # Home PC
-    OPENCV_ROOT = ..\opencv411   # These are precompiled libraries and headers
+    OPENCV_ROOT = ..\opencv412   # These are precompiled libraries and headers
     PYTHON_DIR = C:\Users\tomjh\mambaforge\envs\acq4
     QT_BASE_DIR = C:\Qt\Qt5.14.2\5.14.2\msvc2017_64    # This is used to find Qt DLLs to copy to build directory
-    OPENCV_DLL_DIR = C:/Users/tomjh/TomJhou Dropbox/JhouLab/Installers/Miniscope/opencv411/bin/$$DEST1/  # No quotes here, but need quotes below after appending filename
+    OPENCV_DLL_DIR = C:/Users/tomjh/TomJhou Dropbox/JhouLab/Installers/Miniscope/opencv412/bin/$$DEST1/  # No quotes here, but need quotes below after appending filename
 }
 
 equals (MACHINE_ID, 1) {
@@ -118,7 +118,7 @@ equals (MACHINE_ID, 2) {
 
 
 OPENCV_LIB_DIR = $$OPENCV_ROOT\lib\\$$DEST1
-OPENCV_FILE = opencv_world4110$$QT_SUFFIX
+OPENCV_FILE = opencv_world4120$$QT_SUFFIX
 
 win32 {
     LIBS += -lole32 -lOleAut32 -lstrmiids  # Need this for enumerating cameras
@@ -173,7 +173,7 @@ first.depends += copydata
 
 # List of files to be copied to target directory
 FILELIST  = "$$OPENCV_DLL_DIR$${OPENCV_FILE}.dll"   # Need quotes here or else it doesn't work.
-FILELIST += $$OPENCV_ROOT\\opencv_videoio_ffmpeg4110_64.dll
+FILELIST += $$OPENCV_ROOT\\opencv_videoio_ffmpeg4120_64.dll
 
 FILELIST += $$PYTHON_DIR\\python38.dll
 
